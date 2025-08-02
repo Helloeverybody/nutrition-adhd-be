@@ -1,17 +1,19 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import {Controller, Get, NotFoundException, Query} from '@nestjs/common';
 import { CalendarService } from './calendar.service';
+import {DailyMealResponseBody, DailyNutritionResponseBody} from "./interfaces/response-body";
+import {checkDateIsValid} from "./validators/check-date-is-valid";
 
-@Controller('/api/daily')
+@Controller('api/daily')
 export class CalendarController {
   constructor(private readonly calendarService: CalendarService) {}
 
   @Get('/nutrients')
-  getNutrientsPerDay(@Query('date') date: string): string {
-    return this.calendarService.MOCKgetNutrientsByDay(date);
+  async getNutrientsPerDay(@Query('date') date: string): Promise<DailyNutritionResponseBody> {
+    return this.calendarService.getNutrientsByDay(+date);
   }
 
   @Get('/meals')
-  getMealsPerDay(@Query('date') date: string): string {
-    return this.calendarService.MOCKgetMealsByDay(date);
+  async getMealsPerDay(@Query('date') date: string): Promise<DailyMealResponseBody[]> {
+    return this.calendarService.getMealsByDay(+date);
   }
 }

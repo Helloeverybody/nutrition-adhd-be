@@ -1,4 +1,4 @@
-export const food = [
+export const foodList = [
     {
         "id": 1,
         "name": "Огурцы",
