@@ -37,19 +37,10 @@ export class FoodService {
     async getFoodDetails(id: number, source: FoodSource): Promise<IFoodDetailsResponseBody | null> {
         switch (source) {
             case FoodSource.fatSecretApi:
-                return lastValueFrom(this.fatSecretApi.getFoodDetails(id))
-                    .then((data) => {
-                        console.log(data.servings.serving)
-                        return {
-                            id: data.food_id,
-                            name: data.food_name,
-                            brand: data.food_type === 'Brand' ? data.brand_name : undefined,
-                            ...getDefaultNutrients(data.servings.serving),
-                        } as IFoodDetailsResponseBody
-                    })
+                return this.getFoodDetailsFromApi(id)
             case FoodSource.database:
             default:
-                return this.foodRepository.findOneBy({ id })
+                return this.getFoodDetailsFromDB(id)
         }
     }
 
@@ -92,5 +83,31 @@ export class FoodService {
                     }
                 ))
             ) as Promise<IFoodListResponseBody[]>
+    }
+
+    private getFoodDetailsFromApi(id: number): Promise<IFoodDetailsResponseBody> {
+        return lastValueFrom(this.fatSecretApi.getFoodDetails(id))
+            .then((data) => {
+                return {
+                    id: data.food_id,
+                    name: data.food_name,
+                    brand: data.food_type === 'Brand' ? data.brand_name : undefined,
+                    source: FoodSource.fatSecretApi,
+                    ...getDefaultNutrients(data.servings.serving),
+                } as IFoodDetailsResponseBody
+            })
+    }
+
+    private getFoodDetailsFromDB(id: number): Promise<IFoodDetailsResponseBody | null> {
+        return this.foodRepository.findOneBy({ id })
+            .then(data => (
+                data
+                    ? {
+                        source: FoodSource.database,
+                        ...data
+                    }
+                    : null
+            ))
+
     }
 }

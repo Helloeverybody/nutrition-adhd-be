@@ -2,8 +2,9 @@ import {Module} from '@nestjs/common';
 import {ConfigModule, ConfigService} from "@nestjs/config";
 import Joi from "@hapi/joi";
 import {TypeOrmModule} from "@nestjs/typeorm";
-import {CalendarModule} from "./controllers/calendar/calendar-module";
+import {CalendarModule} from "./controllers/calendar/calendar.module";
 import {FoodModule} from "./controllers/food/food-module";
+import {MealModule} from "./controllers/meal/meal.module";
 
 @Module({
     imports: [
@@ -33,7 +34,8 @@ import {FoodModule} from "./controllers/food/food-module";
             })
         }),
         CalendarModule,
-        FoodModule
+        FoodModule,
+        MealModule
     ]
 })
 export class AppModule {

@@ -31,10 +31,4 @@ export class FoodController {
 
     await this.foodService.addFood(body)
   }
-
-  //TODO MealController
-  @Post('/meal')
-  addMeal(@Body() body: string): any {
-    return { success: true }
-  }
 }

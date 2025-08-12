@@ -8,6 +8,9 @@ export class MealEntity {
     @Column()
     name: string;
 
+    @Column({ nullable: true })
+    brand?: string;
+
     @Column({ type: 'timestamp' })
     time: Date;
 

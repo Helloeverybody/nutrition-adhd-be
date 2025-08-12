@@ -14,6 +14,7 @@ export interface IFoodDetailsResponseBody {
     fat: number,
     protein: number,
     carbs: number,
+    source: FoodSource
 }
 
 export enum FoodSource {

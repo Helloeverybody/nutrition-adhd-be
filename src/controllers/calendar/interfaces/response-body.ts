@@ -1,15 +1,6 @@
-export interface DailyNutritionResponseBody {
+export interface IDailyNutritionResponseBody {
     protein: number,
     fat: number,
     calories: number,
     carbs: number,
-}
-
-export interface DailyMealResponseBody {
-    time: string,
-    name: string,
-    protein: number,
-    fat: number,
-    calories: number,
-    carbs: number
 }

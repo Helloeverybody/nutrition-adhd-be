@@ -6,8 +6,6 @@ import {ozToGram} from "./oz-to-gram";
 export function getDefaultNutrients(servings: IServing[]): INutrition | null {
     const serving = getDefaultServing(servings)
 
-    console.log(serving)
-
     if (!serving) {
         return null
     }
