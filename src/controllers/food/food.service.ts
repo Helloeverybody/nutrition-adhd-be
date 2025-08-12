@@ -3,10 +3,11 @@ import {IAddFoodRequestBody} from "./interfaces/request-body.interface";
 import {InjectRepository} from "@nestjs/typeorm";
 import {FoodEntity} from "./entities/food.entity";
 import {Like, Repository} from "typeorm";
-import {IFoodListResponseBody} from "./interfaces/response-body.interface";
+import {FoodSource, IFoodDetailsResponseBody, IFoodListResponseBody} from "./interfaces/response-body.interface";
 import {FatSecretApiService} from "../../apis/fat-secret/fat-secret-api.service";
 import {lastValueFrom, map} from "rxjs";
-import {IFoodItem, IServing} from "../../apis/fat-secret/interfaces/response.interfaces";
+import {IFoodItem} from "../../apis/fat-secret/interfaces/response.interfaces";
+import {getDefaultNutrients} from "../../apis/fat-secret/helpers/get-default-nutrients";
 
 @Injectable()
 export class FoodService {
@@ -17,40 +18,12 @@ export class FoodService {
     ) {}
 
     async searchFood(searchString?: string): Promise<IFoodListResponseBody[]> {
-        const getDefaultServingCal = (servings: IServing[]) => {
-            const defaultServing = servings.find(serving => Boolean(Number(serving.is_default)))
-
-            if (!defaultServing) {
-                return 0
-            }
-
-            return Number(defaultServing.calories) / Number(defaultServing.metric_serving_amount) * 100
-        }
-
-        const transformFoodSearchData = (data?: IFoodItem[]) =>
-            data?.map(
-                food => ({
-                    id: food.food_id,
-                    calories: getDefaultServingCal(food.servings.serving),
-                    name: food.food_name,
-                    brand: food.food_type === 'Brand' ? food?.brand_name : undefined
-                })
-            )
-
-        const apiFoodRequest$ = this.fatSecretApi.getFoodList(searchString, 1, 10)
-            .pipe(
-                map(data => transformFoodSearchData(data?.foods_search?.results?.food) ?? [])
-            )
-
-        const ownFoodDbRequest = this.foodRepository.find({
-            take: 10,
-            select: ['calories', 'name', 'id'],
-            where: { name: searchString ? Like(`%${searchString}%`) : undefined }
-        }) as Promise<IFoodListResponseBody[]>
+        const apiRequest = this.getFoodListFromApi(searchString)
+        const dbRequest = this.getFoodListFromDB(searchString)
 
         const [ownFood, apiFood] = await Promise.all([
-            ownFoodDbRequest,
-            lastValueFrom(apiFoodRequest$)
+            dbRequest,
+            apiRequest
         ])
 
         return ownFood.concat(apiFood)
@@ -59,5 +32,65 @@ export class FoodService {
     async addFood(data: IAddFoodRequestBody) {
         const food = this.foodRepository.create(data)
         await this.foodRepository.save(food)
+    }
+
+    async getFoodDetails(id: number, source: FoodSource): Promise<IFoodDetailsResponseBody | null> {
+        switch (source) {
+            case FoodSource.fatSecretApi:
+                return lastValueFrom(this.fatSecretApi.getFoodDetails(id))
+                    .then((data) => {
+                        console.log(data.servings.serving)
+                        return {
+                            id: data.food_id,
+                            name: data.food_name,
+                            brand: data.food_type === 'Brand' ? data.brand_name : undefined,
+                            ...getDefaultNutrients(data.servings.serving),
+                        } as IFoodDetailsResponseBody
+                    })
+            case FoodSource.database:
+            default:
+                return this.foodRepository.findOneBy({ id })
+        }
+    }
+
+    private async getFoodListFromApi(searchString?: string): Promise<IFoodListResponseBody[]> {
+        const transformFoodSearchData = (data?: IFoodItem[]) =>
+            data?.map(
+                food => ({
+                    id: food.food_id,
+                    calories: getDefaultNutrients(food.servings.serving)?.calories || 0,
+                    name: food.food_name,
+                    brand: food.food_type === 'Brand' ? food?.brand_name : undefined,
+                    source: FoodSource.fatSecretApi
+                })
+            )
+
+        const request$ = this.fatSecretApi.getFoodList(searchString, 1, 10)
+            .pipe(
+                map(data => transformFoodSearchData(data?.foods_search?.results?.food) ?? [])
+            )
+
+        return lastValueFrom(request$)
+    }
+
+    private async getFoodListFromDB(searchString?: string): Promise<IFoodListResponseBody[]> {
+        const dbFoodRequest = this.foodRepository.find({
+            take: 10,
+            select: ['calories', 'name', 'id', 'brand'],
+            where: [
+                { name: searchString ? Like(`%${searchString}%`) : undefined },
+                { brand: searchString ? Like(`%${searchString}%`) : undefined }
+            ],
+        })
+
+        return dbFoodRequest
+            .then((foodList) =>
+                foodList.map(food => (
+                    {
+                        ...food,
+                        source: FoodSource.database
+                    }
+                ))
+            ) as Promise<IFoodListResponseBody[]>
     }
 }

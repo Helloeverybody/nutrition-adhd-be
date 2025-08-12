@@ -1,9 +1,10 @@
 import {Injectable, InternalServerErrorException} from "@nestjs/common";
 import {HttpService} from "@nestjs/axios";
-import {IAuthKeyResponse, IFoodsResponse} from "./interfaces/response.interfaces";
+import {IAuthKeyResponse, IFoodDetailsResponse, IFoodItem, IFoodsResponse} from "./interfaces/response.interfaces";
 import {catchError, map, Observable, of, switchMap, take, tap} from "rxjs";
 import {ConfigService} from "@nestjs/config";
 import {FatSecretApiError} from "./interfaces/error.interfaces";
+import {AxiosResponse} from "axios/index";
 
 @Injectable()
 export class FatSecretApiService {
@@ -70,14 +71,34 @@ export class FatSecretApiService {
                     }
                 })
             ),
-            map(({data}) => {
-                if ('error' in data) {
-                    throw new InternalServerErrorException(`FatSecret API error: ${data?.error?.message}`)
-                }
-
-                return data as IFoodsResponse
-            }),
+            tap(this.fatSecretErrorHandler),
+            map(({data}) => data as IFoodsResponse),
         )
     }
 
+    getFoodDetails(id: number): Observable<IFoodItem> {
+        return this.authKey$.pipe(
+            switchMap((authKey) =>
+                this.httpService.get<IFoodDetailsResponse>('https://platform.fatsecret.com/rest/food/v4', {
+                    params: {
+                        food_id: id,
+                        format: 'json',
+                        flag_default_serving: true
+                    },
+                    headers: {
+                        Authorization: `Bearer ${authKey}`,
+                        'Content-Type': 'application/json'
+                    }
+                })
+            ),
+            tap(this.fatSecretErrorHandler),
+            map(({data}) => (data as IFoodDetailsResponse).food)
+        )
+    }
+
+    private fatSecretErrorHandler({data}: AxiosResponse) {
+        if ('error' in data) {
+            throw new InternalServerErrorException(`FatSecret API error: ${data?.error?.message}`)
+        }
+    }
 }

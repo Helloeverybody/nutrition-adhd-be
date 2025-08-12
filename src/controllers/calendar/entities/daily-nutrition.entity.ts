@@ -8,15 +8,15 @@ export class DailyNutritionEntity {
     @Column({ type: 'timestamp' })
     date: Date;
 
-    @Column()
+    @Column('float8')
     carbs: number;
 
-    @Column()
+    @Column('float8')
     protein: number;
 
-    @Column()
+    @Column('float8')
     fat: number;
 
-    @Column()
+    @Column('float8')
     calories: number;
 }

@@ -1,3 +1,5 @@
+import {ServingUnit} from "./nutrition.interface";
+
 export interface IAuthKeyResponse {
     access_token: string,
     token_type: string,
@@ -15,10 +17,17 @@ export interface IFoodsResponse {
     }
 }
 
+export interface IFoodDetailsResponse {
+    food: IFoodItem
+}
+
 export interface IServing {
     metric_serving_amount: number,
-    metric_serving_unit: string,
+    metric_serving_unit: ServingUnit,
     calories: number,
+    fat: number,
+    protein: number,
+    carbohydrate: number,
     is_default: '1' | '0'
 }
 

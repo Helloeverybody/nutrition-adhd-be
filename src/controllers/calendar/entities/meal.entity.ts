@@ -11,30 +11,30 @@ export class MealEntity {
     @Column({ type: 'timestamp' })
     time: Date;
 
-    @Column()
+    @Column('float8')
     carbs: number;
 
-    @Column()
+    @Column('float8')
     protein: number;
 
-    @Column()
+    @Column('float8')
     fat: number;
 
-    @Column()
+    @Column('float8')
     calories: number;
 
-    @Column()
+    @Column('float8')
     weight: number;
 
-    @Column()
+    @Column('float8')
     carbsPerWeight: number;
 
-    @Column()
+    @Column('float8')
     proteinPerWeight: number;
 
-    @Column()
+    @Column('float8')
     fatPerWeight: number;
 
-    @Column()
+    @Column('float8')
     caloriesPerWeight: number;
 }

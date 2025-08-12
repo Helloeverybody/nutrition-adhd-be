@@ -1,7 +1,7 @@
-import {BadRequestException, Body, Controller, Get, Param, Post, Query} from '@nestjs/common';
+import {BadRequestException, Body, Controller, Get, NotFoundException, Param, Post, Query} from '@nestjs/common';
 import { FoodService } from './food.service';
 import {IAddFoodRequestBody} from "./interfaces/request-body.interface";
-import {IFoodListResponseBody} from "./interfaces/response-body.interface";
+import {IFoodDetailsResponseBody, IFoodListResponseBody} from "./interfaces/response-body.interface";
 
 @Controller('/api/food')
 export class FoodController {
@@ -10,6 +10,17 @@ export class FoodController {
   @Get()
   async getFood(@Query('search') searchString?: string): Promise<IFoodListResponseBody[]> {
     return this.foodService.searchFood(searchString);
+  }
+
+  @Get('/:id')
+  async getFoodDetails(@Param('id') id: string, @Query('source') source: string): Promise<IFoodDetailsResponseBody> {
+    const foodDetails = await this.foodService.getFoodDetails(Number(id), Number(source));
+
+    if (!foodDetails) {
+      throw new NotFoundException('Food not found')
+    }
+
+    return foodDetails;
   }
 
   @Post()
