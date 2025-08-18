@@ -1,6 +1,6 @@
 import {BadRequestException, Body, Controller, Get, Post, Query} from '@nestjs/common';
 import { MealService } from './meal.service';
-import {IDailyMealResponseBody} from "./interfaces/response-body";
+import {IDailyMealResponseBody, IDailyNutritionResponseBody} from "./interfaces/response-body";
 import {IAddMealRequestBody} from "./interfaces/request-body.interface";
 
 @Controller('api/meal')
@@ -19,5 +19,10 @@ export class MealController {
     }
 
     return this.mealService.addMeal(body)
+  }
+
+  @Get('/daily-nutrients')
+  async getNutrientsPerDay(@Query('date') date: string): Promise<IDailyNutritionResponseBody> {
+    return this.mealService.getNutrientsByDay(+date);
   }
 }

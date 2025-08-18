@@ -2,18 +2,22 @@ import {Injectable, NotFoundException} from '@nestjs/common';
 import {InjectRepository} from "@nestjs/typeorm";
 import {Between, DeepPartial, Repository} from "typeorm";
 import {MealEntity} from "./entities/meal.entity";
-import {getDayRange} from "./helpers/get-day-range";
-import {IDailyMealResponseBody} from "./interfaces/response-body";
+import {getDayRange} from "../../lib/helpers/get-day-range";
+import {IDailyMealResponseBody, IDailyNutritionResponseBody} from "./interfaces/response-body";
 import {IAddMealRequestBody} from "./interfaces/request-body.interface";
 import {FoodService} from "../food/food.service";
 import {toFixedNumber} from "../../lib/helpers/to-fixed-number";
 import {nutrientPerWeight} from "../../lib/helpers/nutrient-per-weight";
+import {DailyNutritionEntity} from "./entities/daily-nutrition.entity";
+import {INutrition} from "../../apis/fat-secret/interfaces/nutrition.interface";
 
 @Injectable()
 export class MealService {
     constructor(
         @InjectRepository(MealEntity)
         private mealRepository: Repository<MealEntity>,
+        @InjectRepository(DailyNutritionEntity)
+        private dailyNutritionRepository: Repository<DailyNutritionEntity>,
         private foodService: FoodService
     ) {}
 
@@ -24,6 +28,7 @@ export class MealService {
 
         return dailyMeals
             .map((meal) => ({
+                id: meal.id,
                 calories: meal.caloriesPerWeight,
                 protein: meal.proteinPerWeight,
                 fat: meal.fatPerWeight,
@@ -57,6 +62,43 @@ export class MealService {
         }
 
         const mealEntity = this.mealRepository.create(meal)
+
+        await this.updateDailyNutrition(mealData.time, {
+            calories: meal.caloriesPerWeight!,
+            protein: meal.proteinPerWeight!,
+            fat: meal.fatPerWeight!,
+            carbs: meal.carbsPerWeight!,
+        })
+
         await this.mealRepository.save(mealEntity)
+    }
+
+    async updateDailyNutrition(dateTimestamp: number, nutrition: INutrition){
+        const { dateStart, dateEnd } = getDayRange(dateTimestamp)
+
+        const day = await this.dailyNutritionRepository.findOneBy({date: Between(dateStart, dateEnd)})
+
+        console.log(day)
+        console.log(nutrition)
+
+        await this.dailyNutritionRepository.save({
+            id: day?.id,
+            date: day?.date ?? dateStart,
+            calories: (day?.calories ?? 0) + nutrition.calories,
+            protein: (day?.protein ?? 0) + nutrition.protein,
+            fat: (day?.fat ?? 0) + nutrition.fat,
+            carbs: (day?.carbs ?? 0) + nutrition.carbs,
+        })
+    }
+
+    async getNutrientsByDay(date: number): Promise<IDailyNutritionResponseBody> {
+        const day = await this.dailyNutritionRepository.findOneBy({date: new Date(date)})
+
+        return {
+            carbs: day?.carbs || 0,
+            fat: day?.fat || 0,
+            protein: day?.protein || 0,
+            calories: day?.calories || 0,
+        };
     }
 }

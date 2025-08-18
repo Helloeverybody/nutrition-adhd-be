@@ -4,6 +4,7 @@ import {TypeOrmModule} from "@nestjs/typeorm";
 import {MealService} from "./meal.service";
 import {MealEntity} from "./entities/meal.entity";
 import {FoodModule} from "../food/food-module";
+import {DailyNutritionEntity} from "./entities/daily-nutrition.entity";
 
 @Module({
     controllers: [MealController],
@@ -11,6 +12,7 @@ import {FoodModule} from "../food/food-module";
     imports: [
         TypeOrmModule.forFeature([
             MealEntity,
+            DailyNutritionEntity
         ]),
         FoodModule
     ]
