@@ -1,14 +1,19 @@
 # NutritionEntity ADHD Backend
 
-## Деплой
-Для генерации контейнера с базой данных запустить:
+Для запуска бэка:
 
 ```bash 
-docker build -t database:latest -f db/Dockerfile . --no-cache
+docker compose -f docker/compose.yaml up --build
 ```
 
-Затем:
+Для сборки образа на прод:
 
 ```bash 
-docker run -P --env-file .env database:latest
+docker compose -f docker/compose.yaml build --no-cache
+```
+
+Чтобы отправить все в DockerHub:
+
+```bash 
+docker push helloeverybody/nutrition-be
 ```

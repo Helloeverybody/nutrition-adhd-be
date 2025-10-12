@@ -1,10 +1,10 @@
 import {Injectable, InternalServerErrorException} from "@nestjs/common";
 import {HttpService} from "@nestjs/axios";
 import {IAuthKeyResponse, IFoodDetailsResponse, IFoodItem, IFoodsResponse} from "./interfaces/response.interfaces";
-import {catchError, map, Observable, of, switchMap, take, tap} from "rxjs";
+import {map, Observable, of, switchMap, tap} from "rxjs";
 import {ConfigService} from "@nestjs/config";
 import {FatSecretApiError} from "./interfaces/error.interfaces";
-import {AxiosResponse} from "axios/index";
+import {AxiosResponse} from "axios";
 
 @Injectable()
 export class FatSecretApiService {

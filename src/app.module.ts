@@ -15,7 +15,8 @@ import {MealModule} from "./controllers/meal/meal.module";
                 POSTGRES_PASSWORD: Joi.string().required(),
                 POSTGRES_DB: Joi.string().required(),
                 PORT: Joi.number(),
-            })
+            }),
+            envFilePath: ['.env.dev']
         }),
         TypeOrmModule.forRootAsync({
             imports: [ConfigModule],

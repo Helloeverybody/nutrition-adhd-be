@@ -1,0 +1,24 @@
+name: helloeverybody/nutrition-be
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+    image: helloeverybody/nutrition-be
+    platform: linux/amd64
+    env_file:
+      - ".env.prod"
+    ports:
+      - "3100:3100"
+    depends_on:
+      database:
+        condition: service_started
+
+  database:
+    image: postgres:latest
+    platform: linux/amd64
+    env_file:
+      - ".env.prod"
+    ports:
+      - "5432:5432"
