@@ -2,6 +2,7 @@ import {BadRequestException, Body, Controller, Get, NotFoundException, Param, Po
 import { FoodService } from './food.service';
 import {IAddFoodRequestBody} from "./interfaces/request-body.interface";
 import {IFoodDetailsResponseBody, IFoodListResponseBody} from "./interfaces/response-body.interface";
+import {isNotDefined} from "../../lib/helpers/is-not-defined";
 
 @Controller('/api/food')
 export class FoodController {
@@ -25,7 +26,16 @@ export class FoodController {
 
   @Post()
   async addFood(@Body() body: IAddFoodRequestBody) {
-    if (!body || !body.name || !body.calories || !body.carbs || !body.protein || !body.fat) {
+    const notDefined = [
+      body,
+      body.name,
+      body.calories,
+      body.carbs,
+      body.protein,
+      body.fat
+    ].some(isNotDefined)
+
+    if (notDefined) {
       throw new BadRequestException('Incorrect body')
     }
 
