@@ -31,7 +31,9 @@ export class FoodService {
 
     async addFood(data: IAddFoodRequestBody) {
         const food = this.foodRepository.create(data)
-        await this.foodRepository.save(food)
+        const { id } = await this.foodRepository.save(food)
+
+        return { id }
     }
 
     async getFoodDetails(id: number, source: FoodSource): Promise<IFoodDetailsResponseBody | null> {

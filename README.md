@@ -1,5 +1,10 @@
 # NutritionEntity ADHD Backend
 
+Затем:
+```bash 
+docker run -p 5432:5432 --env-file .env.dev postgres:latest
+```
+
 Для запуска бэка:
 
 ```bash 

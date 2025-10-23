@@ -29,6 +29,6 @@ export class FoodController {
       throw new BadRequestException('Incorrect body')
     }
 
-    await this.foodService.addFood(body)
+    return await this.foodService.addFood(body)
   }
 }
