@@ -1,0 +1,3 @@
+[submodule "nutrition-server"]
+	path = nutrition-server
+	url = git@github.com:Helloeverybody/nutrition-server.git
