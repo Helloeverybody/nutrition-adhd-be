@@ -3,6 +3,6 @@ node_modules
 .vscode
 dist
 docker
-.env.dev
+docker/.env.*
 .gitignore
 

@@ -16,7 +16,7 @@ import {MealModule} from "./controllers/meal/meal.module";
                 POSTGRES_DB: Joi.string().required(),
                 PORT: Joi.number(),
             }),
-            envFilePath: ['.env.dev']
+            envFilePath: ['./docker/.env.local']
         }),
         TypeOrmModule.forRootAsync({
             imports: [ConfigModule],

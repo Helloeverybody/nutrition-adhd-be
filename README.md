@@ -1,24 +1,40 @@
 # NutritionEntity ADHD Backend
 
-Затем:
-```bash 
-docker run -p 5432:5432 --env-file .env.dev postgres:latest
-```
+### Локально
 
-Для запуска бэка:
+- Запуск базы данных (всегда контейнером):
 
-```bash 
-docker compose -f docker/compose.yaml up --build
-```
+  ```bash 
+  docker run -p 5432:5432 --env-file docker/.env.local postgres:latest
+  ```
 
-Для сборки образа на прод:
+- Запуск бэка локально
 
-```bash 
-docker compose -f docker/compose.yaml build --no-cache
-```
+  ```bash 
+  npm run start:dev
+  ```
 
-Чтобы отправить все в DockerHub:
+- Развернуть бд с бэком в контейнерах:
 
-```bash 
-docker push helloeverybody/nutrition-be
-```
+  ```bash 
+  docker compose -f docker/compose.dev.yaml up --build
+  ```
+
+### Деплой
+- Для сборки образа на прод:
+
+  ```bash 
+  docker compose -f docker/compose.prod.yaml build --no-cache
+  ```
+
+- Для сборки образа на стейдж:
+
+  ```bash 
+  docker compose -f docker/compose.stage.yaml build --no-cache
+  ```
+
+- Отправить образ в DockerHub:
+
+  ```bash 
+  docker push helloeverybody/nutrition-be
+  ```
